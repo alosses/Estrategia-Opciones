@@ -3,382 +3,357 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte Interactivo de Estrategias USD/CLP</title>
+    <title>Reporte Interactivo de Estrategias USD/CLP v3.2 FINAL</title>
     <style>
-        /* --- General Setup & Fonts --- */
+        :root {
+            --azul-principal: #005FFF;
+            --verde-ganancia: #59A80F;
+            --rojo-perdida: #F40034;
+            --amarillo-atencion: #F9B316;
+            --fondo-verde: #EBF3E7;
+            --fondo-rojo: #FEEBEE;
+            --fondo-amarillo: #FDF7E8;
+            --fondo-azul: #E1E9FD;
+            --gris-texto: #333;
+            --gris-claro: #f4f4f9;
+            --borde-color: #ddd;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             margin: 0;
-            padding: 0;
-            background-color: #FDF7E8; /* Amarillo Background 2 */
-            color: #333;
+            padding: 20px;
+            background-color: var(--gris-claro);
+            color: var(--gris-texto);
         }
 
-        /* --- Main Container & Header --- */
         .container {
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            margin: auto;
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        .header {
+
+        header {
             text-align: center;
+            border-bottom: 2px solid var(--borde-color);
             padding-bottom: 20px;
-            border-bottom: 2px solid #E1E9FD; /* Azul Background 2 */
-        }
-        .header h1 {
-            color: #005FFF; /* Azul */
-            margin: 0;
-        }
-        .header p {
-            color: #5B86F7; /* Azul Opcional 1 */
-            font-size: 1.1em;
-            margin-top: 5px;
+            margin-bottom: 30px;
         }
 
-        /* --- Section Styling --- */
-        .section {
-            margin-top: 30px;
-        }
-        .section h2 {
-            color: #005FFF; /* Azul */
-            border-left: 4px solid #F9B316; /* Amarillo */
-            padding-left: 10px;
-            margin-bottom: 20px;
-        }
+        header h1 { color: var(--azul-principal); margin: 0; font-size: 2.2em; }
+        header p { margin: 5px 0 0; font-size: 1.1em; color: #666; }
 
-        /* --- Analysis Card Styling --- */
-        .analysis-grid {
+        h2 { color: var(--azul-principal); border-bottom: 2px solid var(--azul-principal); padding-bottom: 10px; margin-top: 40px; }
+        h3 { color: var(--gris-texto); }
+
+        .market-analysis {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
-        }
-        .analysis-card {
-            background-color: #EBF3E7; /* Verde Background 2 */
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #D4E9C1; /* Verde Background 1 */
-        }
-        .analysis-card h3 {
-            margin-top: 0;
-            color: #59A80F; /* Verde */
+            margin-bottom: 30px;
         }
 
-        /* --- Strategy Card Styling --- */
-        .strategy-card {
-            background-color: #ffffff;
-            border: 1px solid #C3D7FB; /* Azul Background 1 */
-            border-radius: 8px;
-            padding: 25px;
-            margin-top: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        .strategy-card.recommended {
-            border-left: 5px solid #59A80F; /* Verde */
-        }
-        .strategy-card.alternative {
-            border-left: 5px solid #F9B316; /* Amarillo */
-        }
-        .strategy-card h3 {
-            margin-top: 0;
-            font-size: 1.5em;
-        }
-        .recommended h3 { color: #59A80F; }
-        .alternative h3 { color: #F9B316; }
+        .card { background: #fff; padding: 20px; border: 1px solid var(--borde-color); border-left: 5px solid var(--azul-principal); border-radius: 5px; }
+        .card h3 { margin-top: 0; }
+        .card-vol { border-color: var(--amarillo-atencion); }
+        .card-skew { border-color: var(--azul-principal); }
+        .card-kurt { border-color: var(--verde-ganancia); }
 
-        /* --- SVG Graph Styling --- */
-        .pnl-graph-container {
-            width: 100%;
-            max-width: 550px;
-            margin: 20px auto;
-            font-size: 12px;
-            position: relative;
-        }
-        .axis { stroke: #aaa; stroke-width: 1; }
-        .axis-label { fill: #888; font-size: 0.9em; }
-        .payoff-line { stroke-width: 3; fill: none; }
-        .profit-zone { fill: #59A80F; opacity: 0.1; }
-        .loss-zone { fill: #F40034; opacity: 0.1; }
-        .key-point { font-weight: bold; }
-        .strike-line { stroke-dasharray: 2, 2; stroke: #888; stroke-width: 1; }
-        #pnlIndicatorBear, #pnlIndicatorStrangle {
-            stroke: #005FFF; /* Azul */
-            stroke-width: 2;
-            fill: white;
-            transition: transform 0.1s ease; /* Use transform for smoother movement */
-        }
-
-        /* --- Interactive Controls Styling --- */
-        .interactive-controls {
-            background-color: #f7f9fc;
-            border: 1px solid #e1e9fd;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 25px;
-            text-align: center;
-        }
-        .interactive-controls label {
-            font-weight: bold;
-            font-size: 1.1em;
-            color: #005FFF;
-        }
-        .interactive-controls input[type="range"] {
-            width: 80%;
-            margin: 10px 0;
-        }
-        .pnl-display {
-            font-size: 1.8em;
-            font-weight: bold;
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            transition: all 0.2s ease;
-        }
-        .pnl-display.profit-bg { background-color: #EBF3E7; color: #59A80F; }
-        .pnl-display.loss-bg { background-color: #FEE9EA; color: #F40034; }
+        .card .value { font-size: 1.8em; font-weight: bold; margin-bottom: 10px; }
+        .card-vol .value { color: var(--amarillo-atencion); }
+        .card-skew .value { color: var(--azul-principal); }
+        .card-kurt .value { color: var(--verde-ganancia); }
         
-        /* --- Table Styling --- */
-        .custom-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 0.9em;
-        }
-        .custom-table th, .custom-table td {
-            padding: 12px;
-            text-align: left;
-            border: 1px solid #E1E9FD;
-        }
-        .custom-table th {
-            background-color: #E1E9FD;
-            color: #005FFF;
-        }
-        .custom-table tr:nth-child(even) { background-color: #f8f8f8; }
-        .custom-table ul {
-            padding-left: 15px;
-            margin: 0;
-        }
+        .vol-chart-container, .anexo-section { margin-top: 30px; padding: 20px; border: 1px solid var(--borde-color); border-radius: 8px; }
+        .anexo-section { background-color: var(--fondo-azul); }
 
-        /* --- Disclaimer Styling --- */
-        .footer-disclaimer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #E1E9FD;
-            font-size: 0.8em;
-            color: #888;
-            text-align: justify;
+        .tenor-selector { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .tenor-selector button {
+            padding: 8px 15px; border: 1px solid var(--borde-color); border-radius: 20px; background-color: #fff; cursor: pointer;
+            font-size: 0.9em; transition: background-color 0.2s, color 0.2s;
         }
+        .tenor-selector button.active { background-color: var(--azul-principal); color: #fff; border-color: var(--azul-principal); font-weight: bold; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid var(--borde-color); padding: 12px; text-align: left; }
+        th { background-color: var(--fondo-azul); font-weight: bold; }
+        tr:nth-child(even) { background-color: var(--gris-claro); }
+        
+        .strategy-details { margin-top: 40px; padding: 20px; border-radius: 8px; border: 1px solid var(--borde-color); }
+        .recommended { background-color: var(--fondo-verde); border-left: 5px solid var(--verde-ganancia); }
+        .alternative { background-color: var(--fondo-amarillo); border-left: 5px solid var(--amarillo-atencion); }
+
+        .interactive-section { display: flex; align-items: center; justify-content: space-between; gap: 30px; margin-top: 20px; flex-wrap: wrap; }
+        .pnl-chart-container { flex: 2; min-width: 400px; }
+        .controls { flex: 1; min-width: 280px; background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .slider { width: 100%; cursor: pointer; }
+        .pnl-display { font-size: 1.5em; font-weight: bold; text-align: center; padding: 10px; border-radius: 5px; margin-top: 15px; transition: background-color 0.3s, color 0.3s; }
+        .pnl-display .label { display: block; font-size: 0.6em; font-weight: normal; color: #666; text-transform: uppercase; }
+        .pnl-profit { background-color: var(--fondo-verde); color: var(--verde-ganancia); }
+        .pnl-loss { background-color: var(--fondo-rojo); color: var(--rojo-perdida); }
+
+        .discarded-table td:first-child { font-weight: bold; }
+        .disclaimer { margin-top: 40px; font-size: 0.8em; color: #999; text-align: justify; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="header">
+        <header>
             <h1>Reporte Interactivo de Estrategias USD/CLP</h1>
-            <p>Análisis Cuantitativo y Recomendación | Fecha: 23-SEP-2025</p>
-        </div>
+            <p>Fecha de Análisis: 29 de Septiembre, 2025</p>
+        </header>
 
-        <div class="section">
-            <h2>Análisis del Entorno de Mercado</h2>
-            <div class="analysis-grid">
-                <div class="analysis-card"><h3>Volatilidad Implícita Alta</h3><p>Las opciones están valoradas por sobre su promedio histórico, incentivando <strong>estrategias de venta de prima</strong>.</p></div>
-                <div class="analysis-card"><h3>Skew Positivo</h3><p>El mercado paga una prima extra por los Calls, indicando un <strong>sesgo generalizado al alza del USD</strong>.</p></div>
-                <div class="analysis-card"><h3>Kurtosis Positiva</h3><p>El mercado asigna una probabilidad elevada a <strong>movimientos bruscos e inesperados</strong> ("colas pesadas").</p></div>
-            </div>
-        </div>
-        
-        <div class="section">
-            <h2>Resumen Comparativo de Estrategias (US $1 millón simulado)</h2>
-            <table class="custom-table">
-                <thead><tr><th>Característica</th><th>Estrategia 1: Bear Call Spread</th><th>Estrategia 2: Short Strangle</th></tr></thead>
-                <tbody>
-                    <tr><td><strong>Visión</strong></td><td>Moderadamente bajista o neutral. Visión de que la volatilidad implícita está sobrevalorada.</td><td>Neutral / Rango. Fuerte convicción de que la volatilidad implícita caerá y el spot se mantendrá estable.</td></tr>
-                    <tr><td><strong>Estructura</strong></td><td>Venta Call (ej: 960) / Compra Call (ej: 975)</td><td>Venta de Call OTM (ej: 970) y Venta de Put OTM (ej: 930)</td></tr>
-                    <tr><td><strong>Prima / Costo (CLP)</strong></td><td><ul><li>Ingreso Venta Call 960: +14.290.205</li><li>Costo Compra Call 975: -11.207.987</li><li><strong>= Ingreso Neto: +3.082.218</strong></li></ul></td><td><ul><li>Ingreso Venta Call 970: +9.240.653</li><li>Ingreso Venta Put 930: +8.812.056</li><li><strong>= Ingreso Neto: +18.052.709</strong></li></ul></td></tr>
-                    <tr><td><strong>Ganancia Máx.</strong></td><td>Prima Neta Recibida (+3.082.218 CLP)</td><td>Prima Neta Recibida (+18.052.709 CLP)</td></tr>
-                    <tr><td><strong>Pérdida Máx.</strong></td><td>Diferencia de Strikes - Prima Neta. Limitada.</td><td>Ilimitada en ambas direcciones.</td></tr>
-                    <tr><td><strong>Justificación</strong></td><td>Capitaliza la alta volatilidad implícita y el sesgo alcista, definiendo el riesgo. Ideal si se cree que el alza será limitada.</td><td>Estrategia de máximo ingreso por primas. Apuesta a que el mercado está sobreestimando la probabilidad de un gran movimiento.</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="section">
-            <h2>Estrategia Recomendada</h2>
-            <div class="strategy-card recommended">
-                <h3>Bear Call Spread</h3>
-                <p>Esta estrategia capitaliza la alta volatilidad y el encarecimiento de los Calls, pero con un <strong>riesgo totalmente definido y limitado</strong>. Es una forma de "agresión disciplinada", ideal para el contexto actual.</p>
-                <div class="pnl-graph-container">
-                    <svg id="svgBear" viewBox="0 0 400 200">
-                        <path class="profit-zone" d="M 0 50 L 200 50 L 221 100 L 0 100 Z"></path>
-                        <path class="loss-zone" d="M 221 100 L 275 150 L 400 150 L 400 200 L 0 200 L 0 100 Z"></path>
-                        <line x1="0" y1="100" x2="400" y2="100" class="axis"></line><line x1="30" y1="0" x2="30" y2="200" class="axis"></line>
-                        <text x="35" y="15" class="axis-label">Ganancia</text><text x="35" y="195" class="axis-label">Pérdida</text>
-                        <text x="340" y="95" class="axis-label">Precio Spot →</text>
-                        <path d="M 0 50 L 200 50 L 275 150 L 400 150" stroke="#005FFF" class="payoff-line" id="payoffPathBear"></path>
-                        <line x1="200" y1="50" x2="200" y2="100" class="strike-line"></line><text x="195" y="115" class="key-point" fill="#333" text-anchor="end">Strike $960</text>
-                        <line x1="275" y1="100" x2="275" y2="150" class="strike-line"></line><text x="280" y="115" class="key-point" fill="#333">Strike $975</text>
-                        <circle id="pnlIndicatorBear" r="5"></circle>
-                    </svg>
+        <main>
+            <section>
+                <h2>Análisis de Mercado</h2>
+                <div class="market-analysis">
+                    <div class="card card-vol"><h3>Volatilidad Implícita (1 Mes)</h3><div class="value">11,30%</div><p>La volatilidad implícita supera a la histórica. Esto indica que las primas de las opciones están <strong>relativamente caras</strong>, favoreciendo la venta de volatilidad.</p></div>
+                    <div class="card card-skew"><h3>Skew (Risk Reversal 25D, 1 Mes)</h3><div class="value">+1,431%</div><p>Un valor fuertemente positivo revela una mayor demanda por Calls. El mercado tiene un claro <strong>sesgo alcista</strong> para el USD/CLP.</p></div>
+                    <div class="card card-kurt"><h3>Kurtosis (Butterfly 25D, 1 Mes)</h3><div class="value">0,234%</div><p>Un valor bajo sugiere que el mercado no asigna una probabilidad elevada a movimientos extremos. Esto hace más eficientes las <strong>estrategias de riesgo definido</strong>.</p></div>
                 </div>
-                <div class="interactive-controls">
-                    <label for="spotSliderBear">Mueve para simular el Spot al Vencimiento</label>
-                    <div id="spotValueBear" style="font-weight:bold; margin-top:5px;"></div>
-                    <input type="range" id="spotSliderBear" min="800" max="1100" value="960" step="0.25">
-                    <div id="pnlValueBear" class="pnl-display"></div>
+                <div class="vol-chart-container">
+                     <h3>Gráfico Interactivo de Volatility Skew</h3>
+                     <p>Selecciona un plazo para visualizar su "sonrisa de volatilidad". La pendiente ascendente (de Puts a Calls) confirma el sesgo alcista del mercado, que se intensifica en los plazos más largos.</p>
+                     <div class="tenor-selector" id="tenorSelector">
+                        <button data-tenor="1M" class="active">1 Mes</button>
+                        <button data-tenor="3M">3 Meses</button>
+                        <button data-tenor="6M">6 Meses</button>
+                        <button data-tenor="1Y">1 Año</button>
+                     </div>
+                     <svg id="volSkewChart" viewbox="0 0 500 300"></svg>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <div class="section">
-            <h2>Estrategia Alternativa</h2>
-            <div class="strategy-card alternative">
-                <h3>Short Strangle</h3>
-                <p>Genera el mayor ingreso por primas. Sin embargo, expone a un <strong>riesgo de pérdida ilimitada</strong>, desaconsejado por el análisis de Kurtosis.</p>
-                <div class="pnl-graph-container">
-                    <svg id="svgStrangle" viewBox="0 0 400 200">
-                        <path class="profit-zone" d="M 68 100 L 125 40 L 275 40 L 332 100 Z"></path>
-                        <path class="loss-zone" d="M 0 180 L 68 100 L 332 100 L 400 180 L 400 200 L 0 200 Z"></path>
-                        <line x1="0" y1="100" x2="400" y2="100" class="axis"></line><line x1="30" y1="0" x2="30" y2="200" class="axis"></line>
-                        <text x="35" y="15" class="axis-label">Ganancia</text><text x="35" y="195" class="axis-label">Pérdida</text>
-                        <text x="340" y="95" class="axis-label">Precio Spot →</text>
-                        <path d="M 0 180 L 68 100 L 125 40 L 275 40 L 332 100 L 400 180" stroke="#F40034" class="payoff-line" id="payoffPathStrangle"></path>
-                        <line x1="125" y1="40" x2="125" y2="100" class="strike-line"></line><text x="120" y="115" class="key-point" fill="#333" text-anchor="end">Strike $930</text>
-                        <line x1="275" y1="40" x2="275" y2="100" class="strike-line"></line><text x="280" y="115" class="key-point" fill="#333">Strike $970</text>
-                        <circle id="pnlIndicatorStrangle" r="5"></circle>
-                    </svg>
+            <section class="anexo-section">
+                <h2>Anexo: ¿Qué es el Delta de una Opción?</h2>
+                <h3>¿Qué es el Delta (&Delta;) de una Opción?</h3>
+                <p>Piensa en el <strong>Delta</strong> como el <strong>velocímetro</strong> de una opción. Mide qué tan rápido y en qué dirección cambia el precio (la prima) de la opción por cada peso que se mueve el tipo de cambio (el spot).</p>
+                <p>En términos simples, el Delta te dice <strong>cuántos pesos se espera que gane o pierda tu opción si el dólar sube CLP 1</strong>.</p>
+                <h3>¿Cómo Leer el Delta?</h3>
+                <h4>1. Rango de Valores</h4><ul><li><strong>Opciones Call (de Compra):</strong> El Delta es <strong>positivo</strong>, entre 0 y 100.</li><li><strong>Opciones Put (de Venta):</strong> El Delta es <strong>negativo</strong>, entre -100 y 0.</li></ul>
+                <h4>2. Interpretación Directa (El Velocímetro)</h4><ul><li>Un <strong>Call con Delta 60</strong> significa que si el spot sube de 959 a 960, la prima del call aumentará en <strong>CLP 0,60</strong>.</li><li>Un <strong>Put con Delta -40</strong> significa que si el spot sube de 959 a 960, la prima del put <strong>perderá</strong> <strong>CLP 0,40</strong>.</li></ul>
+                <h4>3. Delta como Probabilidad (El Pronóstico)</h4>
+                <p>El valor absoluto del Delta es una excelente <strong>aproximación de la probabilidad</strong> de que la opción termine *"in-the-money"* al vencimiento.</p>
+                <ul><li><strong>25D Call:</strong> Un "25D Call" tiene un <strong>Delta de 25</strong>, lo que implica un <strong>25% de probabilidad</strong> de que el dólar termine sobre su strike.</li><li><strong>25D Put:</strong> Un "25D Put" tiene un <strong>Delta de -25</strong>, implicando un <strong>25% de probabilidad</strong> de que el dólar termine bajo su strike.</li></ul>
+            </section>
+
+            <section>
+                <h2>Tabla Comparativa de Estrategias</h2>
+                <table>
+                    <thead><tr><th>Característica</th><th>Estrategia Recomendada (Bull Put Spread)</th><th>Estrategia Alternativa (Bull Call Spread)</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Visión</strong></td><td>Alcista moderado</td><td>Alcista</td></tr>
+                        <tr><td><strong>Plazo Recomendado</strong></td><td>30 Días (1 Mes)</td><td>30 Días (1 Mes)</td></tr>
+                        <tr><td><strong>Estructura</strong></td><td>Venta Put K (955) / Compra Put K (940)</td><td>Compra Call K (965) / Venta Call K (980)</td></tr>
+                        <tr><td><strong>Prima Neta (Nocional 1MM USD)</strong></td><td style="color: var(--verde-ganancia); font-weight: bold;">+ CLP 3.779.000</td><td style="color: var(--rojo-perdida); font-weight: bold;">- CLP 5.412.000</td></tr>
+                        <tr><td><strong>Ganancia Máxima (Nocional 1MM USD)</strong></td><td style="color: var(--verde-ganancia);">+ CLP 3.779.000</td><td style="color: var(--verde-ganancia);">+ CLP 9.588.000</td></tr>
+                        <tr><td><strong>Pérdida Máxima (Nocional 1MM USD)</strong></td><td style="color: var(--rojo-perdida);">- CLP 11.221.000</td><td style="color: var(--rojo-perdida);">- CLP 5.412.000</td></tr>
+                        <tr><td><strong>Punto de Equilibrio (Break-Even)</strong></td><td style="font-weight: bold;">951,221</td><td style="font-weight: bold;">970,412</td></tr>
+                        <tr><td><strong>Probabilidad de Éxito (Implícita)</strong></td><td>62%</td><td>36%</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="strategy-recommended" class="strategy-details recommended">
+                <h2>Estrategia Recomendada (Perfil Moderado): Bull Put Spread</h2>
+                <p><strong>Justificación:</strong> Es la estrategia óptima para el escenario actual. Capitaliza la volatilidad cara al ingresar una prima, se alinea con la visión alcista del mercado y, lo más importante, tiene un riesgo definido y una alta probabilidad de éxito. La operación genera ganancias mientras el spot al vencimiento se mantenga por encima de 951,221.</p>
+                <div class="interactive-section">
+                    <div class="pnl-chart-container"><svg id="pnlChartBPS" viewbox="0 0 500 300"></svg></div>
+                    <div class="controls">
+                        <label for="spotSliderBPS">Simulador de Spot al Vencimiento:</label>
+                        <input type="range" id="spotSliderBPS" class="slider" min="860" max="1060" step="0.1" value="959.26">
+                        <div id="pnlDisplayBPS" class="pnl-display">
+                            <span id="simSpotBPS">Spot: 959,26</span><br>
+                            <span class="label">P&L (Contrato 1MM USD)</span>
+                            <span id="pnlValueBPS">CLP 3.779.000</span>
+                        </div>
+                    </div>
                 </div>
-                 <div class="interactive-controls">
-                    <label for="spotSliderStrangle">Mueve para simular el Spot al Vencimiento</label>
-                    <div id="spotValueStrangle" style="font-weight:bold; margin-top:5px;"></div>
-                    <input type="range" id="spotSliderStrangle" min="850" max="1050" value="950" step="0.5">
-                    <div id="pnlValueStrangle" class="pnl-display"></div>
+            </section>
+            
+            <section id="strategy-alternative" class="strategy-details alternative">
+                <h2>Estrategia Alternativa: Bull Call Spread</h2>
+                <p><strong>Justificación:</strong> Una alternativa para una visión alcista más direccional. En lugar de recibir una prima, se paga un costo acotado (débito) para obtener un mayor potencial de ganancia si el USD/CLP sube significativamente. La pérdida está limitada a la prima pagada. Es adecuada si se espera un alza por sobre el nivel de 970,412.</p>
+                <div class="interactive-section">
+                    <div class="pnl-chart-container"><svg id="pnlChartBCS" viewbox="0 0 500 300"></svg></div>
+                    <div class="controls">
+                        <label for="spotSliderBCS">Simulador de Spot al Vencimiento:</label>
+                        <input type="range" id="spotSliderBCS" class="slider" min="860" max="1060" step="0.1" value="959.26">
+                        <div id="pnlDisplayBCS" class="pnl-display">
+                            <span id="simSpotBCS">Spot: 959,26</span><br>
+                            <span class="label">P&L (Contrato 1MM USD)</span>
+                            <span id="pnlValueBCS">-5.412.000</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        
-        <div class="footer-disclaimer">
-            <p>Este documento ha sido elaborado con el propósito de otorgar información general acerca de Bci Corredor de Bolsa S.A. y puede servir de ayuda para la evaluación y decisión que cada inversionista haga en forma individual e independiente. Aún cuando se ha hecho un esfuerzo razonable, Bci Corredor de Bolsa S.A. no asume la responsabilidad de cualquier recomendación implícita o explícita que en éste se efectúe. Este documento no es una solicitud ni una oferta para comprar o vender ninguno de los instrumentos financieros a los que se hace referencia en él.
+            </section>
 
-Todas las opiniones y expresiones contenidas en esta presentación pueden ser modificadas sin previo aviso. El resultado de cualquier operación financiera realizada con apoyo de la información que aquí se presenta, es exclusiva responsabilidad de la persona que la realiza. Esta información y aquella en la que está basada, ha sido obtenida en base a información pública de fuentes que estimamos confiables. Sin embargo, no garantiza que sea exacta ni completa.
+            <section>
+                <h2>Otras Estrategias Consideradas y Descartadas</h2>
+                <p>Se analizaron otras estructuras comunes que fueron descartadas por las siguientes razones:</p>
+                <table class="discarded-table">
+                    <tr><td><strong>Compra de Straddle / Strangle</strong></td><td>Involucra comprar volatilidad. Dado que la volatilidad implícita ya está cara en comparación con la histórica, esta estrategia tiene un alto costo y un "carry" negativo por el paso del tiempo.</td></tr>
+                    <tr><td><strong>Venta de Straddle / Strangle</strong></td><td>Aunque se beneficia de la volatilidad cara, esta estrategia conlleva un <strong>riesgo ilimitado</strong>, lo cual es inadecuado para un perfil de riesgo moderado.</td></tr>
+                    <tr><td><strong>Compra de Call / Put (Seco)</strong></td><td>El alto nivel de volatilidad encarece la prima de las opciones individuales. Esto resulta en un punto de equilibrio muy exigente y una alta pérdida por el decaimiento del valor tiempo (theta).</td></tr>
+                </table>
+            </section>
 
-Esta publicación en ningún caso significa que Bci Corredor de Bolsa S.A. pueda hacer oferta pública en Chile, de valores extranjeros que no se encuentren inscritos, tantos éstos como su emisor, en el registro de valores de la Superintendencia de Valores y Seguros. La gestión financiera y el riesgo de la intermediación de valores por Bci Corredor de Bolsa S.A., no guarda relación con la de entidades bancarias o financieras del grupo empresarial al cual pertenece. Bci Corredor de Bolsa S.A. no asume responsabilidad por la solvencia de los emisores de los valores que el cliente adquiera o por la rentabilidad de los mismos.</p>
-        </div>
+            <section><p class="disclaimer"><strong>Disclaimer:</strong> Este reporte ha sido generado con fines informativos y educativos, basado en los datos de mercado proporcionados. No constituye una oferta o recomendación de inversión. Las estrategias con opciones financieras conllevan riesgos significativos, incluyendo la posible pérdida total de la inversión. Los cálculos de probabilidad son teóricos y no garantizan resultados futuros. Se recomienda consultar con un asesor financiero antes de realizar cualquier operación.</p></section>
+        </main>
     </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-
-    // --- LÓGICA COMÚN ---
-    const notional = 1000000;
-    const clpFormatter = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 });
-
-    // --- LÓGICA PARA EL BEAR CALL SPREAD ---
-    const sliderBear = document.getElementById('spotSliderBear');
-    const spotValueBear = document.getElementById('spotValueBear');
-    const pnlValueBear = document.getElementById('pnlValueBear');
-    const pnlIndicatorBear = document.getElementById('pnlIndicatorBear');
+document.addEventListener('DOMContentLoaded', function() {
     
-    const shortStrikeBear = 960;
-    const longStrikeBear = 975;
-    const netPremiumBear = 3082218;
-    const pnlMaxBear = netPremiumBear;
-    const pnlMinBear = (shortStrikeBear - longStrikeBear) * notional + netPremiumBear;
-
-    // Puntos de referencia visuales en el SVG
-    const svgXFor960 = 200;
-    const svgXFor975 = 275;
-    const svgYForMaxPnlBear = 50;
-    const svgYForMaxLossBear = 150;
-
-    function mapSpotToX_Bear(spot) {
-        if (spot <= shortStrikeBear) return svgXFor960 - (shortStrikeBear - spot); // Extiende a la izquierda
-        if (spot >= longStrikeBear) return svgXFor975 + (spot - longStrikeBear); // Extiende a la derecha
-        const percentage = (spot - shortStrikeBear) / (longStrikeBear - shortStrikeBear);
-        return svgXFor960 + percentage * (svgXFor975 - svgXFor960);
-    }
-
-    function calculateBearPnl(spot) {
-        if (spot <= shortStrikeBear) return pnlMaxBear;
-        if (spot >= longStrikeBear) return pnlMinBear;
-        return (shortStrikeBear - spot) * notional + netPremiumBear;
-    }
+    const contractSize = 1000000;
+    const formatSpot = (num) => new Intl.NumberFormat('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+    const formatCLP = (num) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(num);
     
-    function updateBearSpread() {
-        const spot = parseFloat(sliderBear.value);
-        const pnl = calculateBearPnl(spot);
+    const bps = { id: 'BPS', strikeShort: 955, strikeLong: 940, netPremium: 3.779, get breakEven() { return this.strikeShort - this.netPremium; }, get maxProfit() { return this.netPremium; }, get maxLoss() { return -(this.strikeShort - this.strikeLong) + this.netPremium; } };
+    const bcs = { id: 'BCS', strikeLong: 965, strikeShort: 980, netDebit: 5.412, get breakEven() { return this.strikeLong + this.netDebit; }, get maxProfit() { return (this.strikeShort - this.strikeLong) - this.netDebit; }, get maxLoss() { return -this.netDebit; } };
+    const spotRangeGlobal = [860, 1060];
 
-        spotValueBear.textContent = `Spot Simulado: ${clpFormatter.format(spot)}`;
-        pnlValueBear.textContent = `P&L: ${clpFormatter.format(pnl)}`;
-        pnlValueBear.className = `pnl-display ${pnl >= 0 ? 'profit-bg' : 'loss-bg'}`;
+    const calculateBpsPnl = (spot) => (spot >= bps.strikeShort) ? bps.maxProfit : (spot <= bps.strikeLong) ? bps.maxLoss : spot - bps.breakEven;
+    const calculateBcsPnl = (spot) => (spot <= bcs.strikeLong) ? bcs.maxLoss : (spot >= bcs.strikeShort) ? bcs.maxProfit : spot - bcs.breakEven;
 
-        const x = mapSpotToX_Bear(spot);
-        const y = svgYForMaxPnlBear + (svgYForMaxLossBear - svgYForMaxPnlBear) * (pnlMaxBear - pnl) / (pnlMaxBear - pnlMinBear);
+    // --- LÓGICA GRÁFICO SKEW INTERACTIVO ---
+    const volData = {
+        '1M': [{ delta: '15D Put', vol: 10.899 },{ delta: '25D Put', vol: 10.923 },{ delta: 'ATM', vol: 11.300 },{ delta: '25D Call', vol: 12.304 },{ delta: '15D Call', vol: 13.085 }],
+        '3M': [{ delta: '15D Put', vol: 12.340 },{ delta: '25D Put', vol: 12.422 },{ delta: 'ATM', vol: 12.660 },{ delta: '25D Call', vol: 13.647 },{ delta: '15D Call', vol: 14.428 }],
+        '6M': [{ delta: '15D Put', vol: 12.287 },{ delta: '25D Put', vol: 12.172 },{ delta: 'ATM', vol: 12.630 },{ delta: '25D Call', vol: 13.654 },{ delta: '15D Call', vol: 14.461 }],
+        '1Y': [{ delta: '15D Put', vol: 12.307 },{ delta: '25D Put', vol: 12.370 },{ delta: 'ATM', vol: 12.850 },{ delta: '25D Call', vol: 13.940 },{ delta: '15D Call', vol: 14.945 }]
+    };
+
+    function updateSkewChart(tenor) {
+        const data = volData[tenor];
+        const svg = document.getElementById('volSkewChart');
+        const width = 500, height = 300;
+        const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+        const chartWidth = width - margin.left - margin.right;
+        const chartHeight = height - margin.top - margin.bottom;
+
+        const allVols = Object.values(volData).flat().map(d => d.vol);
+        const minVol = Math.floor(Math.min(...allVols)) - 1;
+        const maxVol = Math.ceil(Math.max(...allVols));
+
+        const xScale = (delta) => {
+            const index = data.findIndex(d => d.delta === delta);
+            return margin.left + (index / (data.length - 1)) * chartWidth;
+        };
+        const yScale = (vol) => margin.top + chartHeight - ((vol - minVol) / (maxVol - minVol)) * chartHeight;
+
+        svg.innerHTML = '';
+        svg.innerHTML += `<line x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" stroke="#ccc" />`;
+        svg.innerHTML += `<line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" stroke="#ccc" />`;
         
-        pnlIndicatorBear.setAttribute('cx', x);
-        pnlIndicatorBear.setAttribute('cy', y);
-    }
-    
-    sliderBear.addEventListener('input', updateBearSpread);
-    updateBearSpread();
-
-    // --- LÓGICA PARA EL SHORT STRANGLE ---
-    const sliderStrangle = document.getElementById('spotSliderStrangle');
-    const spotValueStrangle = document.getElementById('spotValueStrangle');
-    const pnlValueStrangle = document.getElementById('pnlValueStrangle');
-    const pnlIndicatorStrangle = document.getElementById('pnlIndicatorStrangle');
-    
-    const putStrikeStrangle = 930;
-    const callStrikeStrangle = 970;
-    const netPremiumStrangle = 18052709;
-    const lowerBEP = 911.95;
-    const upperBEP = 988.05;
-
-    // Puntos de referencia visuales en el SVG
-    const svgXForLowerBEP = 68;
-    const svgXForPutStrike = 125;
-    const svgXForCallStrike = 275;
-    const svgXForUpperBEP = 332;
-    const svgYForMaxPnlStrangle = 40;
-    const svgYForZeroPnl = 100;
-
-    function mapSpotToX_Strangle(spot) {
-        if (spot < lowerBEP) return svgXForLowerBEP - (lowerBEP - spot) * 2;
-        if (spot < putStrikeStrangle) return svgXForLowerBEP + (spot - lowerBEP) * (svgXForPutStrike - svgXForLowerBEP) / (putStrikeStrangle - lowerBEP);
-        if (spot <= callStrikeStrangle) return svgXForPutStrike + (spot - putStrikeStrangle) * (svgXForCallStrike - svgXForPutStrike) / (callStrikeStrangle - putStrikeStrangle);
-        if (spot <= upperBEP) return svgXForCallStrike + (spot - callStrikeStrangle) * (svgXForUpperBEP - svgXForCallStrike) / (upperBEP - callStrikeStrangle);
-        return svgXForUpperBEP + (spot - upperBEP) * 2;
-    }
-
-    function calculateStranglePnl(spot) {
-        if (spot >= putStrikeStrangle && spot <= callStrikeStrangle) return netPremiumStrangle;
-        if (spot < putStrikeStrangle) return (spot - putStrikeStrangle) * notional + netPremiumStrangle;
-        return (callStrikeStrangle - spot) * notional + netPremiumStrangle;
-    }
-    
-    function updateStrangle() {
-        const spot = parseFloat(sliderStrangle.value);
-        const pnl = calculateStranglePnl(spot);
-        
-        spotValueStrangle.textContent = `Spot Simulado: ${clpFormatter.format(spot)}`;
-        pnlValueStrangle.textContent = `P&L: ${clpFormatter.format(pnl)}`;
-        pnlValueStrangle.className = `pnl-display ${pnl >= 0 ? 'profit-bg' : 'loss-bg'}`;
-        
-        const x = mapSpotToX_Strangle(spot);
-        let y;
-        if (pnl >= netPremiumStrangle) {
-            y = svgYForMaxPnlStrangle;
-        } else {
-             y = svgYForZeroPnl + (svgYForMaxPnlStrangle - svgYForZeroPnl) * pnl / netPremiumStrangle;
+        for (let i = minVol; i <= maxVol; i++) {
+            if(i % 1 === 0) {
+                svg.innerHTML += `<line x1="${margin.left}" y1="${yScale(i)}" x2="${width - margin.right}" y2="${yScale(i)}" stroke="#eee" />`;
+                svg.innerHTML += `<text x="${margin.left - 10}" y="${yScale(i) + 4}" font-size="10" text-anchor="end">${i}%</text>`;
+            }
         }
 
-        pnlIndicatorStrangle.setAttribute('cx', x);
-        pnlIndicatorStrangle.setAttribute('cy', y);
+        data.forEach(d => { svg.innerHTML += `<text x="${xScale(d.delta)}" y="${height - margin.bottom + 15}" font-size="10" text-anchor="middle">${d.delta.replace(' Put','P').replace(' Call','C')}</text>`; });
+        svg.innerHTML += `<text x="${width/2}" y="${height - 5}" font-size="12" text-anchor="middle">Delta de la Opción</text>`;
+        
+        let points = data.map(d => `${xScale(d.delta)},${yScale(d.vol)}`).join(' ');
+        svg.innerHTML += `<polyline points="${points}" fill="none" stroke="var(--azul-principal)" stroke-width="3"/>`;
+        data.forEach(d => { svg.innerHTML += `<circle cx="${xScale(d.delta)}" cy="${yScale(d.vol)}" r="4" fill="var(--azul-principal)" stroke="#fff" stroke-width="2"/>`; });
+    }
+    
+    document.querySelectorAll('#tenorSelector button').forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelector('#tenorSelector button.active').classList.remove('active');
+            button.classList.add('active');
+            updateSkewChart(button.dataset.tenor);
+        });
+    });
+    
+    // --- LÓGICA GRÁFICOS P&L ---
+    function drawPnlChart(config) {
+        const { svgId, strategy } = config;
+        const { pnlFunction, pnlRange, breakEven, strikeLong, strikeShort } = strategy;
+        
+        const svg = document.getElementById(svgId);
+        const width = 500, height = 300, margin = { top: 20, right: 20, bottom: 50, left: 50 };
+        const chartWidth = width - margin.left - margin.right, chartHeight = height - margin.top - margin.bottom;
+        const xScale = (spot) => margin.left + ((spot - spotRangeGlobal[0]) / (spotRangeGlobal[1] - spotRangeGlobal[0])) * chartWidth;
+        const yScale = (pnl) => margin.top + chartHeight - ((pnl - pnlRange[0]) / (pnlRange[1] - pnlRange[0])) * chartHeight;
+        
+        svg.innerHTML = '';
+        
+        // Ejes y Ticks del Eje X
+        svg.innerHTML += `<line x1="${margin.left}" y1="${yScale(0)}" x2="${width - margin.right}" y2="${yScale(0)}" stroke="#888" stroke-width="1.5"/>`;
+        for (let spotTick = Math.ceil(spotRangeGlobal[0]/10)*10; spotTick <= spotRangeGlobal[1]; spotTick += 10) {
+            const x = xScale(spotTick);
+            svg.innerHTML += `<line x1="${x}" y1="${yScale(0)}" x2="${x}" y2="${yScale(0)+4}" stroke="#aaa"/>`;
+            svg.innerHTML += `<text x="${x}" y="${yScale(0)+14}" font-size="9" text-anchor="middle" fill="#666">${spotTick}</text>`;
+        }
+        
+        // Líneas de Strikes y Break-Even
+        const keyPoints = [
+            { value: breakEven, color: 'var(--amarillo-atencion)', label: `BE ${formatSpot(breakEven)}` },
+            { value: strikeLong, color: '#aaa', label: `K ${formatSpot(strikeLong)}` },
+            { value: strikeShort, color: '#aaa', label: `K ${formatSpot(strikeShort)}` }
+        ];
+
+        keyPoints.forEach(p => {
+            const x = xScale(p.value);
+            svg.innerHTML += `<line x1="${x}" y1="${margin.top}" x2="${x}" y2="${height - margin.bottom}" stroke="${p.color}" stroke-width="1" stroke-dasharray="3,3"/>`;
+            svg.innerHTML += `<text x="${x}" y="${height - margin.bottom + 25}" font-size="10" font-weight="bold" fill="${p.color}" text-anchor="middle">${p.label}</text>`;
+        });
+        
+        svg.innerHTML += `<text x="${width/2}" y="${height - 5}" font-size="12" text-anchor="middle">Spot al Vencimiento</text>`;
+        svg.innerHTML += `<text x="${margin.left - 10}" y="${margin.top + 10}" font-size="12" text-anchor="end">P&L</text>`;
+
+        let points = '';
+        const step = (spotRangeGlobal[1] - spotRangeGlobal[0]) / 200;
+        for (let spot = spotRangeGlobal[0]; spot <= spotRangeGlobal[1]; spot += step) { points += `${xScale(spot)},${yScale(pnlFunction(spot))} `; }
+        
+        const breakEvenX = xScale(breakEven);
+        svg.innerHTML += `<path d="${points} L ${xScale(spotRangeGlobal[1])},${yScale(0)} L ${breakEvenX},${yScale(0)} Z" fill="var(--fondo-verde)" />`;
+        svg.innerHTML += `<path d="${points} L ${breakEvenX},${yScale(0)} L ${xScale(spotRangeGlobal[0])},${yScale(0)} Z" fill="var(--fondo-rojo)" />`;
+        svg.innerHTML += `<polyline points="${points}" fill="none" stroke="var(--azul-principal)" stroke-width="3"/>`;
+        svg.innerHTML += `<circle id="indicator-${svgId}" r="5" fill="var(--rojo-perdida)" stroke="#fff" stroke-width="2"/>`;
     }
 
-    sliderStrangle.addEventListener('input', updateStrangle);
-    updateStrangle();
+    function setupInteractiveChart(config) {
+        const { id, strategy, initialSpot } = config;
+        const { pnlFunction, pnlRange } = strategy;
+
+        const slider = document.getElementById(`spotSlider${id}`), pnlDisplay = document.getElementById(`pnlDisplay${id}`), simSpotDisplay = document.getElementById(`simSpot${id}`), pnlValueDisplay = document.getElementById(`pnlValue${id}`), indicator = document.getElementById(`indicator-pnlChart${id}`);
+        const width = 500, height = 300, margin = { top: 20, right: 20, bottom: 50, left: 50 };
+        const chartWidth = width - margin.left - margin.right, chartHeight = height - margin.top - margin.bottom;
+        const xScale = (spot) => margin.left + ((spot - spotRangeGlobal[0]) / (spotRangeGlobal[1] - spotRangeGlobal[0])) * chartWidth;
+        const yScale = (pnl) => margin.top + chartHeight - ((pnl - pnlRange[0]) / (pnlRange[1] - pnlRange[0])) * chartHeight;
+
+        function updateDisplay(spot) {
+            const pnl = pnlFunction(spot) * contractSize;
+            simSpotDisplay.textContent = `Spot: ${formatSpot(spot)}`;
+            pnlValueDisplay.textContent = formatCLP(pnl);
+pnlDisplay.classList.toggle('pnl-profit', pnl >= 0);
+pnlDisplay.classList.toggle('pnl-loss', pnl < 0);
+            if (indicator) { indicator.setAttribute('cx', xScale(spot)); indicator.setAttribute('cy', yScale(pnlFunction(spot))); }
+        }
+        slider.addEventListener('input', (e) => updateDisplay(parseFloat(e.target.value)));
+        updateDisplay(initialSpot);
+    }
+
+    // --- INICIALIZACIÓN DE TODO ---
+    updateSkewChart('1M');
+
+    const bpsStrategy = { ...bps, pnlFunction: calculateBpsPnl, pnlRange: [bps.maxLoss - 2, bps.maxProfit + 2] };
+    const bcsStrategy = { ...bcs, pnlFunction: calculateBcsPnl, pnlRange: [bcs.maxLoss - 2, bcs.maxProfit + 2] };
+    
+    drawPnlChart({ svgId: 'pnlChartBPS', strategy: bpsStrategy });
+    setupInteractiveChart({ id: 'BPS', strategy: bpsStrategy, initialSpot: 959.26 });
+    
+    drawPnlChart({ svgId: 'pnlChartBCS', strategy: bcsStrategy });
+    setupInteractiveChart({ id: 'BCS', strategy: bcsStrategy, initialSpot: 959.26 });
 });
 </script>
 
